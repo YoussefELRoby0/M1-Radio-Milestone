@@ -173,10 +173,10 @@ footer{background:var(--navy);color:var(--stone);text-align:center;padding:34px 
 <div class="card"><h3>2 · The Detector</h3><p>The diode lets current through only on positive peaks, charging the capacitor up to the peak. The resistor lets it discharge slowly, so the output follows the signal's <b>envelope</b> — the shape that carries the sound.</p><span class="formula">τ = R·C</span></div>
 </div>
 <div class="flow reveal">
-<div class="node">📡 Radio Signal<small>antenna / source</small></div><span class="arrow">➜</span>
-<div class="node">🎛️ Tuned Circuit<small>coil + capacitor</small></div><span class="arrow">➜</span>
-<div class="node">🔺 Detector<small>diode + RC</small></div><span class="arrow">➜</span>
-<div class="node">🔊 Output<small>recovered envelope</small></div>
+<div class="node"> Radio Signal<small>antenna / source</small></div><span class="arrow">➜</span>
+<div class="node"> Tuned Circuit<small>coil + capacitor</small></div><span class="arrow">➜</span>
+<div class="node"> Detector<small>diode + RC</small></div><span class="arrow">➜</span>
+<div class="node"> Output<small>recovered envelope</small></div>
 </div></div></section>
 
 <section id="steps"><div class="wrap">
@@ -192,7 +192,7 @@ footer{background:var(--navy);color:var(--stone);text-align:center;padding:34px 
 <div><label for="N">Turns N</label><input id="N" type="number" value="75" min="1"></div>
 <div><label for="D">Coil diameter d (cm)</label><input id="D" type="number" value="5" step="0.1" min=".1"></div>
 <div><label for="Ln">Winding length ℓ (cm)</label><input id="Ln" type="number" value="6" step="0.1" min=".1"></div></div>
-<p class="note" style="margin-bottom:0">⚠️ d = 5 cm and ℓ = 6 cm are only <b>placeholder example values</b>, not your lab's measurements. Replace them with your PVC pipe and winding.</p>
+<p class="note" style="margin-bottom:0">⚠️ d = 5 cm and ℓ = 6 cm are only <b>placeholder example values</b>, Replace them with your PVC pipe and winding.</p>
 <div class="read"><div><b id="Lout">–</b><span>Inductance L (µH)</span></div><div><b id="C819">–</b><span>C needed for 819 kHz (pF)</span></div><div><b id="fmin">–</b><span>Lowest f₀ (at 280 pF)</span></div><div><b id="fmax">–</b><span>Highest f₀ (at 20 pF)</span></div></div>
 <div class="out" id="c819msg"></div></div>
 </div></section>
