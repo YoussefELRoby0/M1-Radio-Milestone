@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LAB 02 · Radio Tuner & Detector</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#202A35;--ivory:#FAF7F0;--terra:#D47B57;--teal:#688A84;--stone:#B9B5AA;--card:color-mix(in srgb,var(--ivory) 70%,white);--r:22px}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:76px}
+body{margin:0;background:var(--ivory);color:var(--navy);font:400 1.05rem/1.65 Nunito,system-ui,sans-serif;overflow-x:hidden}
+h1,h2,h3,.logo{font-family:Fredoka,Nunito,sans-serif;font-weight:600;line-height:1.15;margin:0}
+h2{font-size:clamp(1.9rem,4vw,2.7rem)}h3{font-size:1.25rem}
+a{color:inherit}.wrap{max-width:1100px;margin:auto;padding:0 20px}
+section{padding:84px 0;position:relative}
+.eyebrow{display:inline-block;background:var(--navy);color:var(--ivory);font:600 .8rem Fredoka;letter-spacing:.12em;text-transform:uppercase;padding:4px 14px;border-radius:99px;margin-bottom:12px}
+.lead{max-width:640px;color:color-mix(in srgb,var(--navy) 80%,var(--stone))}
+.wave{display:block;width:100%;height:24px;margin:10px 0 28px;color:var(--terra)}
+/* nav */
+nav{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--ivory) 92%,transparent);backdrop-filter:blur(8px);border-bottom:2px solid var(--stone)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;height:64px}
+.logo{display:flex;gap:8px;align-items:center;text-decoration:none;font-size:1.2rem}
+.logo svg{width:34px;height:34px}
+nav ul{display:flex;gap:4px;list-style:none;margin:0;padding:0}
+nav li a{display:block;padding:8px 14px;border-radius:99px;text-decoration:none;font-weight:700;font-size:.95rem;transition:.2s}
+nav li a:hover,nav li a.on{background:var(--navy);color:var(--ivory)}
+#burger{display:none;background:none;border:2px solid var(--navy);border-radius:12px;padding:6px 12px;font:600 1rem Fredoka;color:var(--navy);cursor:pointer}
+@media(max-width:820px){#burger{display:block}nav ul{display:none;position:absolute;top:64px;left:0;right:0;flex-direction:column;background:var(--ivory);padding:12px 20px;border-bottom:2px solid var(--stone)}nav ul.open{display:flex}}
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:8px;background:var(--terra);color:var(--navy);border:2px solid var(--navy);border-radius:99px;padding:12px 26px;font:600 1.05rem Fredoka;text-decoration:none;box-shadow:0 4px 0 var(--navy);transition:.15s;cursor:pointer}
+.btn:hover{transform:translateY(2px);box-shadow:0 2px 0 var(--navy)}
+/* hero */
+.hero{padding-top:50px;overflow:hidden}.hero .wrap{display:grid;grid-template-columns:1.1fr .9fr;gap:30px;align-items:center}
+.hero h1{font-size:clamp(2.4rem,6vw,4.1rem);margin:10px 0 16px}.hero h1 em{font-style:normal;color:var(--terra)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:22px 0}.chip{border:2px dashed var(--stone);border-radius:99px;padding:3px 14px;font-weight:700;font-size:.9rem;background:var(--card)}
+.hero-art{position:relative;animation:bob 5s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-10px) rotate(1deg)}}
+.star{position:absolute;color:var(--terra);animation:tw 3s infinite}.star:nth-child(2){animation-delay:1s;color:var(--teal)}.star:nth-child(3){animation-delay:2s}
+@keyframes tw{50%{transform:scale(.5) rotate(40deg);opacity:.5}}
+.sig path{stroke-dasharray:6 8;animation:dash 2s linear infinite}@keyframes dash{to{stroke-dashoffset:-28}}
+@media(max-width:820px){.hero .wrap{grid-template-columns:1fr}.hero-art{max-width:380px;margin:auto}}
+/* cards */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:22px}
+.card{background:var(--card);border:2px solid var(--navy);border-radius:var(--r);padding:22px;box-shadow:6px 6px 0 var(--stone);transition:.25s}
+.card:hover{transform:translate(-3px,-3px) rotate(-.5deg);box-shadow:9px 9px 0 var(--teal)}
+.card .ico{width:76px;height:76px;background:var(--ivory);border:2px solid var(--navy);border-radius:50% 50% 50% 18px;display:grid;place-items:center;margin-bottom:12px}
+.card .ico svg{width:52px;height:52px}
+.spec{display:inline-block;background:var(--teal);color:var(--ivory);border-radius:99px;padding:2px 12px;font:600 .85rem Fredoka;margin:6px 6px 0 0}
+.card p{margin:.4em 0 0}
+.note{border-left:6px solid var(--terra);background:var(--card);border-radius:0 16px 16px 0;padding:12px 18px;margin:22px 0;font-size:.95rem}
+/* how */
+.alt{background:var(--navy);color:var(--ivory)}.alt .lead{color:var(--stone)}.alt .eyebrow{background:var(--terra);color:var(--navy)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:22px}@media(max-width:760px){.two{grid-template-columns:1fr}}
+.alt .card{background:color-mix(in srgb,var(--navy) 88%,var(--stone));border-color:var(--stone);box-shadow:6px 6px 0 var(--teal);color:var(--ivory)}
+.formula{background:var(--ivory);color:var(--navy);border-radius:14px;padding:8px 14px;font:600 1.1rem Fredoka;display:inline-block;margin-top:10px}
+.flow{display:flex;align-items:stretch;justify-content:center;gap:6px;flex-wrap:wrap;margin-top:40px}
+.node{background:var(--ivory);color:var(--navy);border:2px solid var(--terra);border-radius:20px;padding:14px 18px;text-align:center;min-width:140px;font:600 1rem Fredoka;flex:1;max-width:210px}
+.node small{display:block;font:400 .8rem Nunito;color:var(--teal)}
+.arrow{align-self:center;color:var(--terra);font-size:1.8rem;animation:nudge 1.4s infinite}@keyframes nudge{50%{transform:translateX(5px)}}
+@media(max-width:700px){.arrow{transform:rotate(90deg);width:100%;text-align:center;animation:none}}
+/* steps */
+.prog{height:14px;border:2px solid var(--navy);border-radius:99px;background:var(--card);overflow:hidden;margin-bottom:30px}
+.prog i{display:block;height:100%;width:0;background:repeating-linear-gradient(45deg,var(--terra) 0 10px,var(--navy) 10px 20px);transition:width .4s}
+.steps{display:grid;gap:16px;counter-reset:s}
+.step{display:grid;grid-template-columns:64px 1fr 62px;gap:16px;align-items:center;background:var(--card);border:2px solid var(--navy);border-radius:var(--r);padding:16px 20px;cursor:pointer;transition:.2s}
+.step:hover{transform:translateX(5px)}.step.done{background:color-mix(in srgb,var(--teal) 22%,var(--ivory));border-color:var(--teal)}
+.num{width:56px;height:56px;border-radius:50%;background:var(--terra);border:2px solid var(--navy);display:grid;place-items:center;font:600 1.5rem Fredoka}
+.step.done .num{background:var(--teal);color:var(--ivory)}.step.done .num::after{content:"✓"}.step.done .num span{display:none}
+.step svg{width:56px;height:56px}.step p{margin:2px 0 0;font-size:.95rem}
+.step small{color:var(--teal);font-weight:700}
+@media(max-width:560px){.step{grid-template-columns:52px 1fr}.step svg{display:none}}
+/* calc + sim */
+.panel{background:var(--card);border:2px solid var(--navy);border-radius:28px;padding:26px;box-shadow:8px 8px 0 var(--stone);margin-bottom:34px}
+.panel h3{margin-bottom:4px}.tag{font:600 .75rem Fredoka;background:var(--stone);border-radius:99px;padding:2px 10px;margin-left:6px;vertical-align:middle}
+.sim{display:grid;grid-template-columns:1fr 1fr;gap:26px;align-items:center;margin-top:16px}@media(max-width:760px){.sim{grid-template-columns:1fr}}
+label{font-weight:700;display:block;margin:12px 0 4px}
+input[type=number]{width:100%;border:2px solid var(--navy);border-radius:12px;padding:8px 12px;font:600 1rem Nunito;background:var(--ivory);color:var(--navy)}
+input[type=range]{-webkit-appearance:none;width:100%;height:14px;border-radius:99px;background:var(--stone);border:2px solid var(--navy);outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:30px;height:30px;border-radius:50%;background:var(--terra);border:3px solid var(--navy);cursor:grab}
+input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:var(--terra);border:3px solid var(--navy);cursor:grab}
+.read{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+.read div{background:var(--ivory);border:2px solid var(--navy);border-radius:16px;padding:8px 12px}
+.read b{display:block;font:600 1.6rem Fredoka;color:var(--teal)}.read span{font-size:.8rem;font-weight:700;color:var(--navy)}
+.mini{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}@media(max-width:560px){.mini{grid-template-columns:1fr}}
+.out{border-radius:14px;padding:10px 14px;background:var(--ivory);border:2px dashed var(--teal);margin-top:12px;font-weight:700;min-height:48px}
+canvas{width:100%;height:auto;background:var(--ivory);border:2px solid var(--navy);border-radius:18px;display:block}
+.legend{display:flex;gap:16px;font-weight:700;font-size:.9rem;margin-top:8px;flex-wrap:wrap}.legend i{display:inline-block;width:22px;height:5px;border-radius:9px;vertical-align:middle;margin-right:6px}
+
+/* ===== Our Work Pipeline ===== */
+#work{background-image:radial-gradient(var(--stone) 1.4px,transparent 1.6px);background-size:26px 26px;border-top:3px dashed var(--stone)}
+.tl{position:relative;display:grid;gap:36px}
+.tl::before{content:"";position:absolute;left:35px;top:20px;bottom:20px;border-left:4px dotted var(--terra)}
+.stage{position:relative;display:grid;grid-template-columns:72px 1fr;gap:20px}
+.badge{width:72px;height:72px;border-radius:50%;background:var(--terra);border:3px solid var(--navy);display:grid;place-items:center;font:600 1.7rem Fredoka;box-shadow:0 4px 0 var(--navy);z-index:1;position:relative}
+.stage:nth-child(even) .badge{background:var(--teal);color:var(--ivory)}
+.stage .card{display:grid;grid-template-columns:1fr 1.05fr;gap:24px;align-items:center;background:var(--ivory)}
+.stage h3{font-size:1.4rem;margin:6px 0}
+.stage .lab{font:600 .75rem Fredoka;letter-spacing:.12em;text-transform:uppercase;color:var(--teal)}
+.result{display:inline-block;font:600 .8rem Fredoka;border-radius:99px;padding:3px 12px;border:2px solid var(--navy);background:var(--stone)}
+.result.ok{background:var(--teal);color:var(--ivory)}
+.gal{position:relative;min-width:0}.vp{aspect-ratio:4/3;border:3px solid var(--navy);border-radius:20px;overflow:hidden;background:var(--card);position:relative;box-shadow:4px 4px 0 var(--stone)}
+.track{display:flex;height:100%;transition:transform .45s cubic-bezier(.4,.1,.2,1)}
+.slide{flex:0 0 100%;height:100%;position:relative}.slide img{width:100%;height:100%;object-fit:contain;display:block;background:#eee8dc}
+.ph{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;padding:16px;font-weight:700;background:var(--card)}
+.slide.missing img{display:none}.slide.missing .ph{display:flex}.ph small{font-weight:600;color:var(--teal);word-break:break-all}
+.gnav{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:12px}
+.gnav button{width:38px;height:38px;border-radius:50%;border:2px solid var(--navy);background:var(--terra);color:var(--navy);font:600 1.1rem Fredoka;cursor:pointer;box-shadow:0 3px 0 var(--navy)}
+.dots{display:flex;gap:7px}.dots i{width:11px;height:11px;border-radius:50%;border:2px solid var(--navy);background:var(--ivory);cursor:pointer}.dots i.on{background:var(--terra);transform:scale(1.2)}
+.gal.single .gnav{display:none}
+@media(max-width:860px){.stage .card{grid-template-columns:1fr}}
+@media(max-width:520px){.tl::before{left:23px}.stage{grid-template-columns:48px 1fr;gap:12px}.badge{width:48px;height:48px;font-size:1.1rem}}
+
+/* videos */
+.vids{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:22px}
+.vid{background:var(--card);border:2px solid var(--navy);border-radius:var(--r);overflow:hidden;transition:.25s}.vid:hover{transform:translateY(-5px) rotate(.4deg)}
+.screen{aspect-ratio:16/9;background:var(--navy);display:grid;place-items:center;color:var(--ivory);text-align:center;position:relative;border-bottom:2px solid var(--navy);font-weight:700}
+.screen iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.screen .play{width:64px;height:64px;border-radius:50%;background:var(--terra);display:grid;place-items:center;margin:0 auto 6px;border:3px solid var(--ivory)}
+.vid div.cap{padding:14px 18px}.vid p{margin:2px 0 0;font-size:.92rem}
+footer{background:var(--navy);color:var(--stone);text-align:center;padding:34px 20px;font-size:.95rem}footer b{color:var(--ivory);font-family:Fredoka}
+.reveal{opacity:0;transform:translateY(24px);transition:.7s}.reveal.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}html{scroll-behavior:auto}.reveal{opacity:1;transform:none}}
+</style></head><body>
+
+<!-- Reusable SVG: cute vintage radio -->
+<svg width="0" height="0" style="position:absolute"><defs>
+<symbol id="radio" viewBox="0 0 240 200">
+<path d="M60 54L40 8M180 54L206 14" stroke="#202A35" stroke-width="5" stroke-linecap="round"/><circle cx="40" cy="8" r="6" fill="#D47B57" stroke="#202A35" stroke-width="3"/><circle cx="206" cy="14" r="6" fill="#688A84" stroke="#202A35" stroke-width="3"/>
+<path d="M62 54Q120 24 178 54" fill="none" stroke="#202A35" stroke-width="5" stroke-linecap="round"/>
+<rect x="14" y="54" width="212" height="134" rx="36" fill="#D47B57" stroke="#202A35" stroke-width="5"/>
+<rect x="24" y="64" width="192" height="114" rx="28" fill="none" stroke="#FAF7F0" stroke-width="3" stroke-dasharray="2 9" stroke-linecap="round"/>
+<rect x="34" y="78" width="100" height="86" rx="20" fill="#FAF7F0" stroke="#202A35" stroke-width="4"/>
+<g fill="#B9B5AA"><circle cx="54" cy="96" r="3.5"/><circle cx="72" cy="96" r="3.5"/><circle cx="90" cy="96" r="3.5"/><circle cx="108" cy="96" r="3.5"/><circle cx="118" cy="96" r="3.5" opacity="0"/><circle cx="54" cy="114" r="3.5"/><circle cx="72" cy="114" r="3.5"/><circle cx="90" cy="114" r="3.5"/><circle cx="108" cy="114" r="3.5"/><circle cx="54" cy="132" r="3.5"/><circle cx="72" cy="132" r="3.5"/><circle cx="90" cy="132" r="3.5"/><circle cx="108" cy="132" r="3.5"/><circle cx="54" cy="150" r="3.5"/><circle cx="72" cy="150" r="3.5"/><circle cx="90" cy="150" r="3.5"/><circle cx="108" cy="150" r="3.5"/></g>
+<circle cx="174" cy="104" r="26" fill="#FAF7F0" stroke="#202A35" stroke-width="4"/><circle cx="174" cy="104" r="14" fill="#688A84" stroke="#202A35" stroke-width="3"/><path d="M174 104L182 92" stroke="#FAF7F0" stroke-width="4" stroke-linecap="round"/>
+<circle cx="150" cy="156" r="9" fill="#202A35"/><circle cx="198" cy="156" r="9" fill="#FAF7F0" stroke="#202A35" stroke-width="3"/><circle cx="174" cy="156" r="5" fill="#688A84" stroke="#202A35" stroke-width="2"/>
+<path d="M62 190v6M178 190v6" stroke="#202A35" stroke-width="6" stroke-linecap="round"/>
+</symbol>
+<symbol id="spark" viewBox="0 0 24 24"><path d="M12 0Q13 11 24 12 13 13 12 24 11 13 0 12 11 11 12 0Z" fill="currentColor"/></symbol>
+<symbol id="wv" viewBox="0 0 400 24" preserveAspectRatio="none"><path d="M0 12Q25 -4 50 12T100 12T150 12T200 12T250 12T300 12T350 12T400 12" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></symbol>
+</defs></svg>
+
+<nav><div class="wrap">
+<a class="logo" href="#home"><svg><use href="#radio"/></svg>Radio Lab 02</a>
+<button id="burger" aria-label="Menu">☰ Menu</button>
+<ul id="menu"><li><a href="#home">Home</a></li><li><a href="#components">Components</a></li><li><a href="#how">How It Works</a></li><li><a href="#steps">Steps</a></li><li><a href="#sim">Simulation</a></li><li><a href="#work">Our Work</a></li><li><a href="#videos">Videos</a></li></ul>
+</div></nav>
+
+<header id="home" class="hero"><div class="wrap">
+<div>
+<span class="eyebrow">Lab 02 · Part B</span>
+<h1>Tune Into the <em>Science</em> of Radio.</h1>
+<p class="lead">Wind a coil, pair it with a tuning capacitor, and catch a signal out of thin air. Part B explores the radio's <b>tuner</b> (a resonant LC circuit) and its <b>detector</b> (a diode peak detector) — how a radio picks one station and recovers the sound.</p>
+<div class="chips"><span class="chip">75-turn coil</span><span class="chip">20–280 pF</span><span class="chip">Target: 819 kHz</span></div>
+<a class="btn" href="#steps">Start the experiment ↓</a>
+</div>
+<div class="hero-art">
+<svg class="star" style="left:2%;top:0;width:30px;height:30px"><use href="#spark"/></svg><svg class="star" style="right:0;top:30%;width:22px;height:22px"><use href="#spark"/></svg><svg class="star" style="left:8%;bottom:6%;width:26px;height:26px"><use href="#spark"/></svg>
+<svg viewBox="0 0 240 200" style="width:100%;filter:drop-shadow(8px 8px 0 #B9B5AA)"><use href="#radio"/></svg>
+<svg class="sig" viewBox="0 0 120 30" style="position:absolute;left:62%;top:-4%;width:36%;color:#688A84"><g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M10 22Q25 4 40 22"/><path d="M30 24Q55 -6 80 24"/><path d="M50 26Q85 -14 118 26"/></g></svg>
+</div></div></header>
+
+<section id="components"><div class="wrap">
+<span class="eyebrow">Parts bin</span><h2>Meet the Components</h2>
+<svg class="wave"><use href="#wv"/></svg>
+<p class="lead">Six small parts make up the whole radio front end.</p><br>
+<div class="grid reveal" id="compGrid"></div>
+<p class="note">Values are the nominal ones from the experiment. Real parts have tolerance, and a hand-wound coil's inductance depends on how it is actually wound — so always compare calculations with your measurements.</p>
+</div></section>
+
+<section id="how" class="alt"><div class="wrap">
+<span class="eyebrow">Under the hood</span><h2>How It Works</h2>
+<svg class="wave" style="color:var(--terra)"><use href="#wv"/></svg>
+<p class="lead">Two stages work together: one chooses the station, the other turns it back into something usable.</p><br>
+<div class="two reveal">
+<div class="card"><h3>1 · The Tank Circuit</h3><p>The coil (L) and tuning capacitor (C) form a parallel LC circuit. Energy sloshes between the two at one natural frequency; signals near it are strongly selected, others are rejected. Turning the capacitor changes C, which moves the station.</p><span class="formula">f₀ = 1 / (2π√(LC))</span></div>
+<div class="card"><h3>2 · The Detector</h3><p>The diode lets current through only on positive peaks, charging the capacitor up to the peak. The resistor lets it discharge slowly, so the output follows the signal's <b>envelope</b> — the shape that carries the sound.</p><span class="formula">τ = R·C</span></div>
+</div>
+<div class="flow reveal">
+<div class="node">📡 Radio Signal<small>antenna / source</small></div><span class="arrow">➜</span>
+<div class="node">🎛️ Tuned Circuit<small>coil + capacitor</small></div><span class="arrow">➜</span>
+<div class="node">🔺 Detector<small>diode + RC</small></div><span class="arrow">➜</span>
+<div class="node">🔊 Output<small>recovered envelope</small></div>
+</div></div></section>
+
+<section id="steps"><div class="wrap">
+<span class="eyebrow">Let's build</span><h2>Step by Step</h2>
+<svg class="wave"><use href="#wv"/></svg>
+<p class="lead">Click a step to tick it off and watch the progress bar fill. <b id="pc">0 / 8</b> done.</p><br>
+<div class="prog"><i id="bar"></i></div>
+<div class="steps" id="stepList"></div>
+
+<div class="panel" style="margin-top:44px"><h3>Steps 1–3 Calculator <span class="tag">your values</span></h3>
+<p style="margin:0">Enter your coil's measured dimensions. Wheeler's formula: <b>L(µH) = N²d² / (18d + 40ℓ)</b> with d and ℓ in <i>inches</i> (converted for you from cm).</p>
+<div class="mini">
+<div><label for="N">Turns N</label><input id="N" type="number" value="75" min="1"></div>
+<div><label for="D">Coil diameter d (cm)</label><input id="D" type="number" value="5" step="0.1" min=".1"></div>
+<div><label for="Ln">Winding length ℓ (cm)</label><input id="Ln" type="number" value="6" step="0.1" min=".1"></div></div>
+<p class="note" style="margin-bottom:0">⚠️ d = 5 cm and ℓ = 6 cm are only <b>placeholder example values</b>, not your lab's measurements. Replace them with your PVC pipe and winding.</p>
+<div class="read"><div><b id="Lout">–</b><span>Inductance L (µH)</span></div><div><b id="C819">–</b><span>C needed for 819 kHz (pF)</span></div><div><b id="fmin">–</b><span>Lowest f₀ (at 280 pF)</span></div><div><b id="fmax">–</b><span>Highest f₀ (at 20 pF)</span></div></div>
+<div class="out" id="c819msg"></div></div>
+</div></section>
+
+<section id="sim" class="alt"><div class="wrap">
+<span class="eyebrow">Play time</span><h2>Simulation Lab</h2>
+<svg class="wave" style="color:var(--terra)"><use href="#wv"/></svg>
+<p class="lead">Ideal-component models for learning. Real hardware has coil resistance, stray capacitance, diode drop and loading that shift results, so use these to understand trends, not to replace measurements.</p><br>
+
+<div class="panel" style="color:var(--navy)"><h3>Simulation 1 · Radio Frequency Tuner <span class="tag">ideal LC</span></h3>
+<p style="margin:0">Uses the L from the calculator above. Slide C and watch the dial.</p>
+<div class="sim"><div>
+<svg id="dial" viewBox="0 0 300 190" style="width:100%"></svg></div>
+<div>
+<label for="cap">Capacitance C: <b id="capv"></b></label><input id="cap" type="range" min="20" max="280" step="1" value="150">
+<div class="read"><div><b id="cv">–</b><span>C (pF)</span></div><div><b id="fv">–</b><span>f₀ (kHz)</span></div></div>
+<div class="out" id="tuneMsg"></div>
+<p style="font-size:.9rem;margin-bottom:0"><b>Notice:</b> f₀ ∝ 1/√C — quadrupling C halves the frequency.</p>
+</div></div></div>
+
+<div class="panel" style="color:var(--navy)"><h3>Simulation 2 · Peak Detector <span class="tag">simplified model</span></h3>
+<p style="margin:0">Carrier 819 kHz into a diode, R = 15 kΩ, C = 3.3 nF (τ = RC ≈ 49.5 µs).</p>
+<div class="sim"><div><canvas id="cv2" width="640" height="320"></canvas>
+<div class="legend"><span><i style="background:#688A84"></i>Input</span><span><i style="background:#D47B57"></i>Detector output</span></div></div>
+<div>
+<label for="amp">Input amplitude: <b id="ampv"></b></label><input id="amp" type="range" min="0.2" max="5" step="0.1" value="2">
+<label for="vd">Assumed diode drop: <b id="vdv"></b></label><input id="vd" type="range" min="0" max="0.7" step="0.05" value="0.2">
+<div class="out" id="detMsg"></div>
+<p style="font-size:.9rem">While the input peaks exceed the output, the diode conducts and the capacitor charges. Between peaks the diode is off and the capacitor drains through R. The diode drop is an <i>assumed</i> value (not a measured 1N60P figure), and source resistance is ignored.</p>
+</div></div></div>
+</div></section>
+
+
+<section id="work"><div class="wrap">
+<span class="eyebrow">Lab notebook</span><h2>Our Work Pipeline</h2>
+<svg class="wave"><use href="#wv"/></svg>
+<p class="lead">A look at how we developed and tested our radio experiment, from the first ESP32 test to building our own function generator.</p><br>
+<div class="tl" id="timeline"></div>
+</div></section>
+
+<section id="videos"><div class="wrap">
+<span class="eyebrow">Watch &amp; learn</span><h2>Video Tutorials</h2>
+<svg class="wave"><use href="#wv"/></svg>
+<p class="lead">To add a video, paste its YouTube ID into the <code>id</code> field of the <code>VIDEOS</code> list at the top of the script.</p><br>
+<div class="vids reveal" id="vidGrid"></div>
+</div></section>
+
+<footer><svg width="60" height="50" viewBox="0 0 240 200"><use href="#radio"/></svg><br><b>LAB 02 · Part B</b> — The Radio's Tuner and Detector</footer>
+
+<script>
+/* ===== EDIT ME: paste YouTube IDs (e.g. "dQw4w9WgXcQ") ===== */
+const VIDEOS=[
+ {id:"",title:"Coil Winding",desc:"Winding 75 turns on the PVC pipe."},
+ {id:"",title:"Circuit Assembly",desc:"Connecting coil, capacitor and detector."},
+ {id:"",title:"Oscilloscope Measurements",desc:"Probing the signals on the scope."},
+ {id:"",title:"Resonance & Frequency Tuning",desc:"Finding resonance and bandwidth."},
+ {id:"",title:"Peak Detector Operation",desc:"Detector output vs. source amplitude."}];
+/* ===== Content ===== */
+const ic=(b)=>`<svg viewBox="0 0 64 64" fill="none" stroke="#202A35" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">${b}</svg>`;
+const COMP=[
+{n:"75-Turn Copper Coil",f:"The inductor (L) of the tank circuit; stores energy in a magnetic field.",s:["N = 75 turns","wound on PVC pipe"],i:ic('<rect x="6" y="22" width="52" height="22" rx="11" fill="#FAF7F0"/><path d="M16 22v22M25 22v22M34 22v22M43 22v22" stroke="#D47B57" stroke-width="4"/>')},
+{n:"Tuning Capacitor",f:"Variable capacitor (C); turning it moves the resonant frequency.",s:["20–280 pF"],i:ic('<path d="M6 32h18M40 32h18"/><path d="M24 14v36M40 14v36" stroke="#688A84" stroke-width="5"/><path d="M16 56L48 10" stroke="#D47B57"/>')},
+{n:"1N60P Diode",f:"Conducts in one direction only, so just the signal peaks charge the detector capacitor.",s:["Germanium-type signal diode"],i:ic('<path d="M4 32h16M44 32h16"/><path d="M20 16v32l24-16z" fill="#D47B57"/><path d="M44 16v32" stroke-width="5"/>')},
+{n:"15 kΩ Resistor",f:"Discharge path for the detector; with C it sets how fast the output decays.",s:["R = 15 kΩ"],i:ic('<path d="M4 32h10l5-12 8 24 8-24 8 24 5-12h12" stroke="#D47B57" stroke-width="4"/>')},
+{n:"3.3 nF Capacitor",f:"Holds the peak voltage in the detector, smoothing the carrier into an envelope.",s:["C = 3.3 nF","τ = RC ≈ 49.5 µs"],i:ic('<path d="M6 32h20M38 32h20"/><path d="M26 14v36M38 14v36" stroke="#688A84" stroke-width="5"/>')},
+{n:"Five-Turn Test Loop",f:"A small loop that couples a test signal into the coil for resonance measurements.",s:["5 turns"],i:ic('<circle cx="32" cy="32" r="22" stroke="#D47B57" stroke-width="4"/><circle cx="32" cy="32" r="15" stroke="#688A84" stroke-width="4"/><circle cx="32" cy="32" r="8"/>')}];
+const STEPS=[
+["Calculate the coil inductance","Use Wheeler's formula with your coil's diameter and length.","Calculator below"],
+["Calculate the capacitance for 819 kHz","Rearrange: C = 1 / ((2πf)² L).","Calculator below"],
+["Calculate the frequency range","Evaluate f₀ at 20 pF and at 280 pF.","Calculator below"],
+["Wind the 75-turn coil","Wind neatly around the PVC pipe and secure the ends.","Hands-on"],
+["Connect the tuning capacitor","Connect it across the coil to form the tank circuit.","Hands-on"],
+["Build the peak detector","Diode in series, then 15 kΩ resistor and 3.3 nF capacitor in parallel to ground.","Hands-on"],
+["Measure resonance and bandwidth","Use the test loop and oscilloscope to find the peak response and its width.","Measurement"],
+["Test the detector output","Vary the source amplitude and record the output.","Measurement"]];
+const sico=[ '<circle cx="32" cy="32" r="20" stroke-dasharray="3 6"/><path d="M20 38l12-18 12 18z"/>','<path d="M14 18h36M14 32h36M14 46h22"/>','<path d="M6 40Q20 6 32 32T58 24"/>','<rect x="6" y="22" width="52" height="22" rx="11"/><path d="M18 22v22M30 22v22M42 22v22"/>','<path d="M22 14v36M40 14v36M6 32h16M40 32h18"/>','<path d="M6 32h14M20 18v28l20-14zM44 18v28M44 32h14"/>','<path d="M4 32q8-22 14 0t14 0 14 0 14 0"/>','<path d="M8 50V30M24 50V18M40 50V36M56 50V10"/>'];
+/* ===== Render ===== */
+const $=id=>document.getElementById(id);
+
+/* ===== Our Work Pipeline: photos from the local images folder ===== */
+const PIPELINE = [
+ {n:"01",title:"Getting the ESP32 Working",tag:"Board check",text:"We started by testing the ESP32 with a simple LED circuit to make sure the board was functioning correctly and that we could control its output.",images:["file:///C:/Users/hamad/OneDrive/images/led-working.jpg"]},
+ {n:"02",title:"Testing Our Homemade Coils",tag:"First attempt",text:"We experimented with our homemade 5-turn test loop and 75-turn coil. Their inductance was too small for our intended application, so they did not produce the expected results.",images:["file:///C:/Users/hamad/OneDrive/images/homemade-5turns-coil.jpg","file:///C:/Users/hamad/OneDrive/images/homemade-75turns-coil.jpg"]},
+ {n:"03",title:"Exploring an Old Radio",tag:"A successful alternative",ok:true,text:"We opened an old radio, explored its internal components, and removed its coils. After testing these coils in our circuit, we obtained successful results.",images:["file:///C:/Users/hamad/OneDrive/images/old-radio.jpg","file:///C:/Users/hamad/OneDrive/images/old-radio-coils.jpg"]},
+ {n:"04",title:"Building the XR2206 Function Generator",tag:"Test signal generation",text:"We also built our own function generator using the XR2206 IC to generate test signals for experimenting with and testing our radio circuit.",images:["file:///C:/Users/hamad/OneDrive/images/xr2206-generator.jpg","file:///C:/Users/hamad/OneDrive/images/theCircuit.jpg"]}
+];
+const camIco = '<svg viewBox="0 0 70 58" fill="none" stroke="#202A35" stroke-width="3.5"><rect x="4" y="12" width="62" height="42" rx="10" fill="#FAF7F0"/><circle cx="35" cy="33" r="12" fill="#D47B57"/><circle cx="35" cy="33" r="5" fill="#FAF7F0"/></svg>';
+function renderPipeline(){
+ $('timeline').innerHTML = PIPELINE.map(st => `<article class="stage reveal"><div class="badge">${st.n}</div><div class="card"><div><div class="lab">Stage ${st.n}</div><h3>${st.title}</h3><span class="result${st.ok?' ok':''}">${st.tag}</span><p>${st.text}</p></div><div class="gal${st.images.length<2?' single':''}" data-i="0"><div class="vp"><div class="track">${st.images.map((src,j)=>`<div class="slide"><img src="${src}" alt="${st.title} — photo ${j+1}" loading="lazy"><div class="ph">${camIco}<span>Photo not found</span><small>${src}</small></div></div>`).join('')}</div></div><div class="gnav"><button type="button" data-d="-1" aria-label="Previous photo">‹</button><div class="dots">${st.images.map((_,j)=>`<i data-j="${j}"></i>`).join('')}</div><button type="button" data-d="1" aria-label="Next photo">›</button></div></div></div></article>`).join('');
+ document.querySelectorAll('#timeline .slide img').forEach(im=>im.addEventListener('error',()=>im.parentElement.classList.add('missing')));
+ document.querySelectorAll('#timeline .gal').forEach(g=>{const tr=g.querySelector('.track'),dots=[...g.querySelectorAll('.dots i')],n=dots.length;const go=i=>{i=(i+n)%n;g.dataset.i=i;tr.style.transform=`translateX(${-100*i}%)`;dots.forEach((d,j)=>d.classList.toggle('on',j===i))};g.querySelectorAll('button').forEach(b=>b.onclick=()=>go(+g.dataset.i + +b.dataset.d));dots.forEach(d=>d.onclick=()=>go(+d.dataset.j));go(0)});
+}
+
+renderPipeline();
+$('compGrid').innerHTML=COMP.map(c=>`<article class="card"><div class="ico">${c.i}</div><h3>${c.n}</h3><p>${c.f}</p>${c.s.map(s=>`<span class="spec">${s}</span>`).join('')}</article>`).join('');
+$('stepList').innerHTML=STEPS.map((s,i)=>`<div class="step reveal" tabindex="0" role="checkbox" aria-checked="false"><div class="num"><span>${i+1}</span></div><div><h3>${s[0]}</h3><p>${s[1]}</p><small>${s[2]}</small></div><svg viewBox="0 0 64 64" fill="none" stroke="#202A35" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">${sico[i]}</svg></div>`).join('');
+function upd(){const n=document.querySelectorAll('.step.done').length;$('bar').style.width=n/8*100+'%';$('pc').textContent=n+' / 8'}
+document.querySelectorAll('.step').forEach(s=>{const t=()=>{s.classList.toggle('done');s.setAttribute('aria-checked',s.classList.contains('done'));upd()};s.onclick=t;s.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();t()}}});
+$('vidGrid').innerHTML=VIDEOS.map((v,i)=>`<div class="vid"><div class="screen">${v.id?`<iframe src="https://www.youtube.com/embed/${v.id}" loading="lazy" allowfullscreen title="${v.title}"></iframe>`:`<div><div class="play">▶</div>Video ${i+1} coming soon</div>`}</div><div class="cap"><h3>${v.title}</h3><p>${v.desc}</p></div></div>`).join('');
+/* nav */
+$('burger').onclick=()=>$('menu').classList.toggle('open');
+$('menu').onclick=e=>{if(e.target.tagName==='A')$('menu').classList.remove('open')};
+const links=[...document.querySelectorAll('#menu a')];
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in')}}),{threshold:.1});
+document.querySelectorAll('.reveal').forEach(e=>io.observe(e));
+const so=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)links.forEach(a=>a.classList.toggle('on',a.hash==='#'+e.target.id))}),{rootMargin:'-45% 0px -50% 0px'});
+document.querySelectorAll('header,section').forEach(s=>so.observe(s));
+/* ===== Physics ===== */
+const fmt=(f)=>f>=1e6?(f/1e6).toFixed(3)+' MHz':(f/1e3).toFixed(1)+' kHz';
+const f0=(L,C)=>1/(2*Math.PI*Math.sqrt(L*C));          // L in H, C in F
+let L=0; // henries
+function wheeler(){const N=+$('N').value,d=+$('D').value/2.54,l=+$('Ln').value/2.54;
+ return 1e-6*(N*N*d*d)/(18*d+40*l)}
+function calc(){L=wheeler();const w=2*Math.PI*819e3,C=1/(w*w*L);
+ $('Lout').textContent=(L*1e6).toFixed(1);$('C819').textContent=(C*1e12).toFixed(1);
+ $('fmin').textContent=fmt(f0(L,280e-12));$('fmax').textContent=fmt(f0(L,20e-12));
+ const ok=C>=20e-12&&C<=280e-12;
+ $('c819msg').textContent=ok?`✅ 819 kHz is reachable: set the capacitor to about ${(C*1e12).toFixed(0)} pF.`:`⚠️ With this L, 819 kHz needs ${(C*1e12).toFixed(0)} pF — outside the 20–280 pF range.`;
+ sim1()}
+['N','D','Ln'].forEach(i=>$(i).oninput=calc);
+/* dial */
+const cx=150,cy=165,R=130,a0=-160,a1=-20;
+const pt=(a,r)=>[cx+r*Math.cos(a*Math.PI/180),cy+r*Math.sin(a*Math.PI/180)];
+function sim1(){const C=+$('cap').value*1e-12,f=f0(L,C),fa=f0(L,280e-12),fb=f0(L,20e-12);
+ const t=(Math.log(fb)-Math.log(f))/(Math.log(fb)-Math.log(fa)); // log scale: low C at left
+ const ang=a1-(a1-a0)*t, nd=pt(ang,R-14);
+ let s=`<path d="M${pt(a0,R).join(' ')}A${R} ${R} 0 0 1 ${pt(a1,R).join(' ')}L${cx+R} ${cy}H${cx-R}Z" fill="#FAF7F0" stroke="#202A35" stroke-width="4"/>`;
+ for(let i=0;i<=20;i++){const a=a0+(a1-a0)*i/20,[x1,y1]=pt(a,R-4),[x2,y2]=pt(a,R-(i%5?14:24));s+=`<path d="M${x1} ${y1}L${x2} ${y2}" stroke="#202A35" stroke-width="${i%5?2:3.5}" stroke-linecap="round"/>`}
+ const lab=(a,txt)=>{const [x,y]=pt(a,R-40);return `<text x="${x}" y="${y}" text-anchor="middle" font-family="Fredoka" font-size="13" fill="#688A84">${txt}</text>`};
+ s+=lab(a0+8,(fb/1e3).toFixed(0))+lab(-90,'kHz')+lab(a1-8,(fa/1e3).toFixed(0));
+ s+=`<path d="M${cx} ${cy}L${nd[0]} ${nd[1]}" stroke="#D47B57" stroke-width="5" stroke-linecap="round"/><circle cx="${cx}" cy="${cy}" r="14" fill="#688A84" stroke="#202A35" stroke-width="4"/>`;
+ s+=`<text x="${cx}" y="${cy-48}" text-anchor="middle" font-family="Fredoka" font-size="26" fill="#202A35">${fmt(f)}</text>`;
+ s+=`<rect x="20" y="172" width="260" height="14" rx="7" fill="#B9B5AA" opacity=".0"/>`;
+ $('dial').innerHTML=s;
+ $('capv').textContent=$('cap').value+' pF';$('cv').textContent=$('cap').value;$('fv').textContent=(f/1e3).toFixed(1);
+ const d=Math.abs(f-819e3);
+ $('tuneMsg').textContent=d<8e3?'🎯 Locked onto 819 kHz!':(f>819e3?'Frequency above 819 kHz — add capacitance.':'Frequency below 819 kHz — reduce capacitance.');
+}
+$('cap').oninput=sim1;
+/* peak detector */
+function sim2(){const A=+$('amp').value,Vd=+$('vd').value;$('ampv').textContent=A.toFixed(1)+' V';$('vdv').textContent=Vd.toFixed(2)+' V';
+ const c=$('cv2'),g=c.getContext('2d'),W=c.width,H=c.height,mid=H/2,T=30e-6,dt=T/W/2,fc=819e3,tau=15e3*3.3e-9;
+ const Vmax=5.5,y=v=>mid-v/Vmax*(H/2-14);
+ g.clearRect(0,0,W,H);g.strokeStyle='#B9B5AA';g.lineWidth=1;g.setLineDash([4,6]);g.beginPath();g.moveTo(0,mid);g.lineTo(W,mid);g.stroke();g.setLineDash([]);
+ g.fillStyle='#202A35';g.font='12px Nunito';g.fillText('+'+Vmax.toFixed(1)+' V',4,14);g.fillText('0 V',4,mid-4);g.fillText('time: 0 → 30 µs',W-110,H-6);
+ let vo=0,pi=[],po=[];
+ for(let k=0;k<=2*W;k++){const t=k*dt,vi=A*Math.sin(2*Math.PI*fc*t);
+  if(vi-Vd>vo)vo=vi-Vd;else vo*=Math.exp(-dt/tau);
+  if(k%2==0){pi.push([k/2,y(vi)]);po.push([k/2,y(vo)])}}
+ const draw=(p,col,w)=>{g.beginPath();p.forEach((q,i)=>i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1]));g.strokeStyle=col;g.lineWidth=w;g.lineJoin='round';g.stroke()};
+ draw(pi,'#688A84',2);draw(po,'#D47B57',4);
+ const pk=Math.max(0,A-Vd);
+ $('detMsg').textContent=`Input peak ${A.toFixed(1)} V → output settles near ${pk.toFixed(2)} V (peak − diode drop).`;}
+$('amp').oninput=sim2;$('vd').oninput=sim2;
+calc();sim2();
+</script></body></html>
